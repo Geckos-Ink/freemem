@@ -1,0 +1,25 @@
+{
+  "name": "freesql",
+  "version": "0.0.1",
+  "description": "An SQL based memory system",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Geckos-Ink/freesql.git"
+  },
+  "keywords": [
+    "sql",
+    "free",
+    "memory",
+    "system"
+  ],
+  "author": "Gecko's Ink <support@geckos.ink>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Geckos-Ink/freesql/issues"
+  },
+  "homepage": "https://github.com/Geckos-Ink/freesql#readme"
+}

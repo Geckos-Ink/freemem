@@ -1,5 +1,5 @@
 {
-  "name": "freesql",
+  "name": "@wizardink/freesql",
   "version": "0.0.1",
   "description": "An SQL based memory system",
   "main": "index.js",

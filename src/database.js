@@ -3,7 +3,9 @@
 exports = {};
 
 class Database {
-
+    constructor(conn){
+        this.conn = conn;
+    }
 }
 
 exports.Database = Database;

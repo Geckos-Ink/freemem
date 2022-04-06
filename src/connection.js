@@ -1,21 +1,25 @@
 
-// yup, this seems pretty weird
-exports = function Connections(){
+exports = function Connection(opts) {
+    if(!this.connections){
+        this.connections = [];
+    }
 
-}
+    opts = opts || {};
 
-class Connection {
-    constructor(opts){
-        opts = opts || {};
-
-        if(opts.host)
-            return new MySQL(opts);
-
+    let conn;
+    if(opts.host){
+        conn = new MySQL(opts);
+    }
+    else {
         if(!opts.file)
             opts.file = ':memory:';
-        return new SQLite(opts);
+        conn = new SQLite(opts);
     }
+
+    this.connections.push(conn);
+    return conn;
 }
+
 
 class MySQL {
     constructor(opts){

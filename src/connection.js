@@ -1,10 +1,16 @@
 
-exports = function Connection(opts) {
+const db = require('./database');
+const await = require('./await');
+
+module.exports = function Connection(opts) {
     if(!this.connections){
         this.connections = [];
     }
 
     opts = opts || {};
+
+    if(typeof opts == 'string')
+        opts = {file: opts}; // check if file or connection?
 
     let conn;
     if(opts.host){
@@ -42,31 +48,50 @@ class MySQL {
 
         console.warn("MySQL to be implemented!");
     }
+
+    getDb(name){
+        //todo
+    }
 }
 
-Connection.MySQL = MySQL;
+module.exports.MySQL = MySQL;
 
 class SQLite {
     constructor(opts){
         var sqlite3 = require('sqlite3').verbose();
         this.db = new sqlite3.Database(opts.file); 
+        
+        //this.db.close();
+    }
 
-        this.db.serialize(function() {
-            this.db.run("CREATE TABLE lorem (info TEXT)");
+    _loadDBInfo(db){
+        db.tablesName = [];
 
-            var stmt = this.db.prepare("INSERT INTO lorem VALUES (?)");
-            for (var i = 0; i < 10; i++) {
-                stmt.run("Ipsum " + i);
-            }
-            stmt.finalize();
+        let end = false;
+        this.db.serialize(()=> {
+            this.db.all("select name from sqlite_schema where type='table'", function(err, rows) { // ... or sqlite_master
+                if(err)
+                    return console.error(err);
 
-            this.db.each("SELECT rowid AS id, info FROM lorem", function(err, row) {
-                console.log(row.id + ": " + row.info);
+                for(let row of rows){
+                    db.tablesName.push(row.name);
+                }
+
+                end = true;
             });
         });
 
-        db.close();
+        await(()=>!end);
+    }
+
+    _newTable(name){
+        let sql = "CREATE TABLE "+name+" ( id INTEGER PRIMARY KEY);"
+        this.db.run(sql);
+    }
+
+    getDb(){
+        return new db.Database(this);
     }
 }
 
-Connection.SQLite = SQLite;
+module.exports.SQLite = SQLite;

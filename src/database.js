@@ -7,15 +7,19 @@ class Database {
         this.conn = conn;
         this.name = name;
 
-        this.tables = {};
+        conn._loadDBInfo(this);
     }
 
     getTable(name){
+        return new Table(this, name);
+    }
 
+    tableExists(name){
+        return this.tablesName.indexOf(name) >= 0;      
     }
 }
 
-exports.Database = Database;
+module.exports.Database = Database;
 
 
 class Table {
@@ -24,14 +28,17 @@ class Table {
         this.name = name;
 
         this.fields = {};
+        this.init();
     }
 
     init(){
-        
+        // create only when it needed
+        if(!this.db.tableExists(this.name))
+            this.db.conn._newTable(this.name);
     }
 }
 
-exports.Table = Table;
+module.exports.Table = Table;
 
 
 class Field {
@@ -42,4 +49,4 @@ class Field {
     }
 }
 
-exports.Field = Field;
+module.exports.Field = Field;

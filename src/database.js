@@ -1,3 +1,4 @@
+const Vars = require('./vars');
 
 // All things she said, all about SQL
 exports = {};
@@ -7,15 +8,28 @@ class Database {
         this.conn = conn;
         this.name = name;
 
+        this.tables = {};
+
         conn._loadDBInfo(this);
     }
 
     getTable(name){
-        return new Table(this, name);
+        if(name instanceof Table)
+            return name;
+
+        return this.tables[name] = this.tables[name] || new Table(this, name);
     }
 
     tableExists(name){
         return this.tablesName.indexOf(name) >= 0;      
+    }
+
+    getDictionary(table){
+        return new Vars.Dictionary(this.getTable(table));
+    }
+
+    getVar(table) {
+        return new Vars.Var(this.getTable(table));
     }
 }
 
@@ -32,9 +46,28 @@ class Table {
     }
 
     init(){
+        if(this.inited)
+            return;
+
         // create only when it needed
-        if(!this.db.tableExists(this.name))
+        if(!this.db.tableExists(this.name)){
             this.db.conn._newTable(this.name);
+
+            //default values...
+        }
+        else {
+            this.db.conn._loadTableInfo(this);
+        }
+
+        this.inited = true;
+    }
+
+    getDictionary(){
+        return this.db.getDictionary(this);
+    }
+
+    getVar(){
+        return this.db.getVar(this);
     }
 }
 

@@ -1,13 +1,12 @@
 const db = require('./database');
 
+module.exports = {};
+
 class Var {
 
     constructor(table, path, parent = undefined){
-        if(table instanceof db.Database)
-            table = table.getTable('vars');
-
         this.table = table;
-        this.path = path;
+        this.path = path || '';
         this.parent = parent;
     }
 
@@ -35,4 +34,15 @@ class Var {
     }
 }
 
-exports = Var;
+module.exports.Var = Var;
+
+class Dictionary {
+    constructor(table){
+        if(table instanceof db.Database)
+            table = table.getTable('vars');  
+
+        this.table = table;
+    }
+}
+
+module.exports.Dictionary = Dictionary;

@@ -60,7 +60,7 @@ class SQLite {
     constructor(opts){
         var sqlite3 = require('sqlite3').verbose();
         this.db = new sqlite3.Database(opts.file); 
-        
+
         //this.db.close();
     }
 
@@ -75,6 +75,29 @@ class SQLite {
 
                 for(let row of rows){
                     db.tablesName.push(row.name);
+                }
+
+                end = true;
+            });
+        });
+
+        await(()=>!end);
+    }
+
+    _loadTableInfo(table){
+        let sql = 'PRAGMA table_info('+table.name+')';
+
+        let end = false;
+
+        table.cols = {};
+
+        this.db.serialize(()=> {
+            this.db.all(sql, function(err, rows) { // ... or sqlite_master
+                if(err)
+                    return console.error(err);
+
+                for(var col in rows){
+                    table.cols[col.name] = col;
                 }
 
                 end = true;

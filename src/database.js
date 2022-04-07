@@ -69,6 +69,15 @@ class Table {
     getVar(){
         return this.db.getVar(this);
     }
+
+    insert(data){
+        for(let col in data){
+            let ct = col.split(':');
+            if(!this.fields[ct[0]]){
+                this.db.conn._alterTable(this, {todo: 'addCol', col, type: ct[1], sample: data[col]});
+            }
+        }
+    }
 }
 
 module.exports.Table = Table;

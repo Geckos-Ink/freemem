@@ -108,8 +108,24 @@ class SQLite {
     }
 
     _newTable(name){
-        let sql = "CREATE TABLE "+name+" ( id INTEGER PRIMARY KEY);"
+        let sql = "CREATE TABLE "+name+" ( id INTEGER PRIMARY KEY AUTOINCREMENT );"
         this.db.run(sql);
+    }
+
+    _alterTable(table, opts){
+
+        function convertType(type){
+            if(!type)
+                return "";
+
+            return " " + type;
+        }
+
+        switch(opts.todo){
+            case 'addCol':
+                this.db.run("ALTER TABLE "+table.name+" ADD "+opts.col + convertType(opts.type));
+                break;
+        }
     }
 
     getDb(){

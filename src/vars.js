@@ -43,6 +43,14 @@ class Dictionary {
 
         this.table = table;
     }
+
+    get(parent=0){
+
+    }
+
+    set(val, parent=0){
+
+    }
 }
 
 module.exports.Dictionary = Dictionary;

@@ -76,6 +76,11 @@ class Table {
             if(!this.fields[ct[0]]){
                 this.db.conn._alterTable(this, {todo: 'addCol', col, type: ct[1], sample: data[col]});
             }
+
+            if(ct.length>1){
+                data[ct[0]] = data[col];
+                delete data[col];
+            }
         }
     }
 }

@@ -27,6 +27,7 @@
     "sqlite3": "^5.0.2"
   },
   "optionalDependencies": {
+    "better-sqlite3": "^7.6.2",
     "deasync": "^0.1.26"
   }
 }

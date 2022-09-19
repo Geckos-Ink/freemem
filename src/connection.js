@@ -26,7 +26,9 @@ module.exports = function Connection(opts) {
     return conn;
 }
 
-
+///
+/// MySQL
+///
 class MySQL {
     constructor(opts){
         var mysql = require('mysql');
@@ -46,7 +48,7 @@ class MySQL {
         
         this.connection.end();
 
-        console.warn("MySQL to be implemented!");
+        console.warn("MySQL must be implemented!");
     }
 
     getDb(name){
@@ -56,12 +58,18 @@ class MySQL {
 
 module.exports.MySQL = MySQL;
 
+///
+/// SQLite
+///
 class SQLite {
     constructor(opts){
         var sqlite3 = require('sqlite3').verbose();
         this.db = new sqlite3.Database(opts.file); 
 
         //this.db.close();
+
+        console.warn("This SQLite connection is based on sqlite3 package and not on better-sqlite3");
+        console.warn("This class is still incomplete. Is advised to try to force better-sqlite3 installation");
     }
 
     _loadDBInfo(db){
@@ -134,3 +142,71 @@ class SQLite {
 }
 
 module.exports.SQLite = SQLite;
+
+///
+/// Better SQLite
+///
+try{
+    const betterSqlite3 = require('better-sqlite3');
+
+    function verboseSqlLite(log){
+        console.log("SQLite3:", log);
+    }
+
+    class Better_SQLite3 {
+        constructor(opts){
+            this.db = betterSqlite3(opts.file, {verbose: verboseSqlLite}); 
+        }
+    
+        _loadDBInfo(db){
+            db.tablesName = [];
+    
+            let rows = this.db.prepare("select name from sqlite_schema where type='table'").all();
+
+            for(let row of rows){
+                db.tablesName.push(row.name);
+            }
+        }
+    
+        _loadTableInfo(table){
+            let sql = 'PRAGMA table_info('+table.name+')';
+    
+            table.cols = {};
+    
+            this.db.prepare(sql).all();
+
+            for(var col in rows){
+                table.cols[col.name] = col;
+            }
+        }
+    
+        _newTable(name){
+            let sql = "CREATE TABLE "+name+" ( id INTEGER PRIMARY KEY AUTOINCREMENT );"
+            this.db.prepare(sql).run();
+        }
+    
+        _alterTable(table, opts){
+    
+            function convertType(type){
+                if(!type)
+                    return "";
+    
+                return " " + type;
+            }
+    
+            switch(opts.todo){
+                case 'addCol':
+                    this.db.prepare("ALTER TABLE "+table.name+" ADD "+opts.col + convertType(opts.type)).run();
+                    break;
+            }
+        }
+    
+        getDb(){
+            return new db.Database(this);
+        }
+    }
+
+    // Replace module
+    module.exports.SQLite = Better_SQLite3;
+}
+catch{}

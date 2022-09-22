@@ -269,6 +269,16 @@ try{
             return info;
         }
 
+        __whereJoin(where){
+            let res = '';
+            for(let part of where){
+                if(typeof part == 'array')
+                    res += this.__whereJoin(part);
+                else 
+                    res += part + ' ';
+            }
+        }
+
         _tableSelect(table, opts){
             let sql = 'SELECT * FROM '+table.name+' ';
 
@@ -276,7 +286,7 @@ try{
                 sql += 'WHERE 1';
             }
             else {
-                sql += opts.where.join(' ');
+                sql += 'WHERE ' + this.__whereJoin(opts.where);
             }
 
             const stmt = this.db.prepare(sql);
@@ -296,7 +306,7 @@ try{
                 sql += '1'
             }
             else {
-                sql += opts.where.join(' ')
+                sql += 'WHERE ' + this.__whereJoin(opts.where);
             }
 
             const stmt = this.db.prepare(sql);
@@ -311,7 +321,7 @@ try{
                 sql += 'WHERE 1';
             }
             else {
-                sql += opts.where.join(' ');
+                sql += 'WHERE ' + this.__whereJoin(opts.where);
             }
 
             const stmt = this.db.prepare(sql);

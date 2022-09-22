@@ -19,7 +19,7 @@ module.exports = function Connection(opts) {
     else {
         if(!opts.file)
             opts.file = ':memory:';
-        conn = new SQLite(opts);
+        conn = new module.exports.SQLite(opts);
     }
 
     this.connections.push(conn);
@@ -173,7 +173,7 @@ try{
     
             table.cols = {};
     
-            this.db.prepare(sql).all();
+            let rows = this.db.prepare(sql).all();
 
             for(var col in rows){
                 table.cols[col.name] = col;
@@ -184,21 +184,139 @@ try{
             let sql = "CREATE TABLE "+name+" ( id INTEGER PRIMARY KEY AUTOINCREMENT );"
             this.db.prepare(sql).run();
         }
-    
-        _alterTable(table, opts){
-    
-            function convertType(type){
-                if(!type)
-                    return "";
-    
-                return " " + type;
+
+        _extractType(value){
+            let type = typeof value;
+
+            switch(type){
+                case 'string':
+                    type = 'TEXT';
+                    break;
+
+                case 'object':
+                    if(value instanceof Date)
+                        type = 'NUMERIC'
+                    break;
+
+                case 'number':
+                    type = isInt(value) ? 'NUMERIC' : 'REAL';
             }
+
+            return type;
+        }
+
+        _convertType(type){ //TODO: convert type of other DBMS
+            if(!type)
+                return undefined;
+
+            return type;
+        }
     
+        _alterTable(table, opts){    
             switch(opts.todo){
                 case 'addCol':
-                    this.db.prepare("ALTER TABLE "+table.name+" ADD "+opts.col + convertType(opts.type)).run();
+                    opts.type = this._convertType(opts.type) || this._extractType(opts.sample);
+                    this.db.prepare("ALTER TABLE "+table.name+" ADD "+opts.col + ' ' + opts.type).run();
+                    this._loadTableInfo(table);
                     break;
             }
+        }
+
+        _formatValue(val){
+            let tVal = typeof val;
+
+            if(tVal == 'string'){
+                return "'"+val+"'";
+            }
+            else if(tVal == 'object'){
+                if(tVal instanceof Date)
+                    return tVal.getTime();
+            }
+
+            return val;
+        }
+
+        _insertIntoTable(table, row){
+            /// Check new columns
+            for(let col in data){
+                let ct = col.split(':');
+                if(!table.cols[ct[0]]){
+                    this._alterTable(this, {todo: 'addCol', col, type: ct[1], sample: data[col]});
+                }
+    
+                if(ct.length>1){
+                    data[ct[0]] = data[col];
+                    delete data[col];
+                }
+            }
+
+            /// Insert
+            let arrNames = [];
+            let arrValues = [];
+
+            for(let r in table.cols){
+                let val = row[r];
+                if(val){
+                    arrNames.push(r);
+                    arrNames.push(this._formatValue(val));
+                }
+            }
+
+            let sql = 'INSERT INTO '+table.name+' ('+arrNames.join(',')+') VALUES ('+arrValues.join(',')+')';
+            let stmt = this.db.prepare(sql);
+            let info = stmt.run();
+            // info.changes
+            return info;
+        }
+
+        _tableSelect(table, opts){
+            let sql = 'SELECT * FROM '+table.name+' ';
+
+            if(!opts.where){
+                sql += 'WHERE 1';
+            }
+            else {
+                sql += opts.where.join(' ');
+            }
+
+            const stmt = this.db.prepare(sql);
+            let res = stmt.all();
+            return res;
+        }
+
+        _tableUpdate(table, opts){
+            let sql = 'UPDATE '+table.name+' SET '
+
+            for(let s in opts.set){
+                sql += s +'='+ this._formatValue(opts.set[s]);
+            }
+
+            sql += ' WHERE ';
+            if(!opts.where){
+                sql += '1'
+            }
+            else {
+                sql += opts.where.join(' ')
+            }
+
+            const stmt = this.db.prepare(sql);
+            let info = stmt.run();
+            return info;
+        }
+
+        _tableDelete(table, opts){
+            let sql = 'DELETE FROM '+table.name+' ';
+
+            if(!opts.where){
+                sql += 'WHERE 1';
+            }
+            else {
+                sql += opts.where.join(' ');
+            }
+
+            const stmt = this.db.prepare(sql);
+            let info = stmt.run();
+            return info;
         }
     
         getDb(){
@@ -209,4 +327,13 @@ try{
     // Replace module
     module.exports.SQLite = Better_SQLite3;
 }
-catch{}
+catch(ex){
+
+}
+
+///
+/// General functions
+///
+function isInt(n){
+    return n % 1 === 0;
+}

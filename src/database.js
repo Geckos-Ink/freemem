@@ -71,17 +71,19 @@ class Table {
     }
 
     insert(data){
-        for(let col in data){
-            let ct = col.split(':');
-            if(!this.fields[ct[0]]){
-                this.db.conn._alterTable(this, {todo: 'addCol', col, type: ct[1], sample: data[col]});
-            }
+        return this.db.conn._insertIntoTable(this, data);
+    }
 
-            if(ct.length>1){
-                data[ct[0]] = data[col];
-                delete data[col];
-            }
-        }
+    select(opts){
+        return this.db.conn._tableSelect(this, opts);
+    }
+
+    update(opts){
+        return this.db.conn._tableUpdate(this, opts);
+    }
+
+    delete(opts){
+        return this.db.conn._tableDelete(this, opts);
     }
 }
 

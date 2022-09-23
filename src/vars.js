@@ -8,6 +8,8 @@ class Var {
         this.table = table;
         this.path = path || '';
         this.parent = parent;
+
+        console.error("TODO: Var");
     }
 
     get(name=undefined){
@@ -42,6 +44,8 @@ class Dictionary {
             table = table.getTable('vars');  
 
         this.table = table;
+
+        console.error("TODO: Dictionary");
     }
 
     get(parent=0){
@@ -54,3 +58,31 @@ class Dictionary {
 }
 
 module.exports.Dictionary = Dictionary;
+
+///
+/// For clarity
+///
+
+class Row {
+    constructor(table, row){
+        this._table = table;
+        this._row = row;
+        this._changes = {};
+
+        for(let f in row){
+            Object.defineProperty(this, f, { 
+                get() { 
+                    return this._changes[f] || row[f]; 
+                },
+                set(val) { 
+                    if(val instanceof Row)
+                        val = val.id;
+                        
+                    this._changes[f] = val;
+                }
+            });
+        }
+    }
+}
+
+module.exports.Row = Row;

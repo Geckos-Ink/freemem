@@ -176,6 +176,13 @@ try{
             let rows = this.db.prepare(sql).all();
 
             for(var col in rows){
+                let name = col.name;
+
+                if(name.startsWith('__')){
+                    name = name.substr(2);
+                    col.tableType = name; 
+                }
+
                 table.cols[col.name] = col;
             }
         }
@@ -290,7 +297,7 @@ try{
             }
 
             const stmt = this.db.prepare(sql);
-            let res = stmt.all();
+            let res = opts.get ? stmt.get() : stmt.all();
             return res;
         }
 

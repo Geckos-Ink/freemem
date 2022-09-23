@@ -52,12 +52,9 @@ class Table {
         // create only when it needed
         if(!this.db.tableExists(this.name)){
             this.db.conn._newTable(this.name);
-
-            //default values...
         }
-        else {
-            this.db.conn._loadTableInfo(this);
-        }
+        
+        this.db.conn._loadTableInfo(this);
 
         this.inited = true;
     }
@@ -68,6 +65,14 @@ class Table {
 
     getVar(){
         return this.db.getVar(this);
+    }
+
+    get(where){
+        if(typeof where == 'number')
+            where = [['id=',where]];
+        
+        let row = new Vars.Row(this, this.select({get: true, where: where}));
+        return row;
     }
 
     insert(data){

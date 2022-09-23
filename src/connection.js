@@ -176,13 +176,6 @@ try{
             let rows = this.db.prepare(sql).all();
 
             for(var col in rows){
-                let name = col.name;
-
-                if(name.startsWith('__')){
-                    name = name.substr(2);
-                    col.tableType = name; 
-                }
-
                 table.cols[col.name] = col;
             }
         }

@@ -69,19 +69,53 @@ class Row {
         this._row = row;
         this._changes = {};
 
+        if(!row)
+            return;
+        
         for(let f in row){
             Object.defineProperty(this, f, { 
                 get() { 
-                    return this._changes[f] || row[f]; 
+                    let id = this._changes[f] || row[f];
+
+                    if(this._table.cols[f].typeTable){
+                        let colTable = this._table.db.getTable(typeTable);
+                        return colTable.get(id);
+                    }
+
+                    return id; 
                 },
                 set(val) { 
                     if(val instanceof Row)
                         val = val.id;
-                        
+
                     this._changes[f] = val;
                 }
             });
         }
+
+        if(this.Exists) 
+            this.exists = true;
+        else
+            this.Exists = true;
+
+
+        Object.defineProperty(this, '_', {
+            get(){
+                if(!this.__)
+                    this.__ = new Proxy(this, {
+                        get(target, prop) { //,receiver => you know also where to it's assigned
+                            return target[prop];
+                        },
+                        set(target, prop, val){
+                            target._changes[prop] = val;
+                        }
+                    });
+
+                return this.__;
+            }
+        })
+
+        
     }
 }
 

@@ -41,7 +41,8 @@ class Table {
         this.db = db;
         this.name = name;
 
-        this.fields = {};
+        this.cols = undefined; // defined by connection...
+
         this.init();
     }
 
@@ -55,6 +56,19 @@ class Table {
         }
         
         this.db.conn._loadTableInfo(this);
+
+        for(let c in this.cols){
+            let col = this.cols[c];
+
+            let name = col.name;
+            if(name.startsWith('__')){
+                name = name.substr(2);
+                col.typeTable = name; 
+            }
+
+            this.cols[name] = col.name;
+            delete this.cols[col.name];
+        }
 
         this.inited = true;
     }

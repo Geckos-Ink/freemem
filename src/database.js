@@ -104,6 +104,20 @@ class Table {
     delete(opts){
         return this.db.conn._tableDelete(this, opts);
     }
+
+    ///
+    /// Internals
+    ///
+    _getWhere(opts){
+        if(!opts) return [];
+        if(opts.where) return opts.where;
+        return opts;
+    }
+
+    _checkWhere(opts){
+        let where = this._getWhere(opts);
+                
+    }
 }
 
 module.exports.Table = Table;

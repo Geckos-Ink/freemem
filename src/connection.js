@@ -175,7 +175,8 @@ try{
     
             let rows = this.db.prepare(sql).all();
 
-            for(var col in rows){
+            for(var c in rows){
+                let col = rows[c];
                 table.cols[col.name] = col;
             }
         }
@@ -271,9 +272,15 @@ try{
 
         __whereJoin(where){
             let res = '';
-            for(let part of where){
-                if(typeof part == 'array')
+            for(let p in where){
+                let part = where[p];
+
+                let toPart = typeof part;
+
+                if(toPart == 'array')
                     res += this.__whereJoin(part);
+                else if(toPart == 'object')
+                    res += p + ' ' + toPart;
                 else 
                     res += part + ' ';
             }

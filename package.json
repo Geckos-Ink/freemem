@@ -24,7 +24,8 @@
   "homepage": "https://github.com/Geckos-Ink/freesql#readme",
   "dependencies": {
     "mysql": "^2.18.1",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "unilang": "github:j-os-io/unilang"
   },
   "optionalDependencies": {
     "better-sqlite3": "^7.6.2",

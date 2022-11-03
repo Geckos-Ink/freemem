@@ -104,4 +104,4 @@ dist
 .tern-port
 
 # modules-sync
-local-linked-modules.txt
+modules-sync.txt
